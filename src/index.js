@@ -1,23 +1,73 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  useParams
+} from "react-router-dom";
 import * as serviceWorker from './serviceWorker';
 
 import { createStore } from 'redux'
-import { Provider } from 'react-redux'
+import { Provider, useDispatch, useSelector } from 'react-redux'
 import allReducer from './reducers'
 
-import { Paper, Box, Grid, CssBaseline } from '@material-ui/core'
+import { CssBaseline } from '@material-ui/core'
+
+import Main from './Main'
+import MenuBar from './MenuBar'
+import RegisterPage from './Register'
 import LoginPage from './Login'
-//let store = createStore(allReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
-ReactDOM.render(
-  // <Provider store={store}>
-  <React.StrictMode>
+import Account from './Account'
+import OpenCourse from './OpenCourse'
+
+let store = createStore(allReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+
+function App() {
+  let loginReducer = useSelector(state => state.loginReducer)
+  let userReducer = useSelector(state => state.userReducer)
+  let dispatch = useDispatch()
+
+  return (
+
     <CssBaseline>
-      <LoginPage></LoginPage>
+      <Router>
+        <MenuBar />
+        <Switch>
+          {loginReducer ?
+            <>
+              {userReducer['Authority'] == '老師' ?
+              <>
+                <Route exact path="/"> <Main /> </Route>
+                <Route path="/帳戶"> <Account /> </Route>
+                <Route path="/開設課程"> <OpenCourse /> </Route>
+              </>
+              :
+              <>
+                <Route exact path="/"> <Main /> </Route>
+                <Route path="/帳戶"> <Account /> </Route>
+              </>
+              }
+            </> :
+            <>
+              <Route exact path="/"> <Main /> </Route>
+              <Route path="/登入"> <LoginPage /> </Route>
+              <Route path="/註冊"> <RegisterPage /> </Route>
+            </>
+          }
+        </Switch>
+      </Router>
+
     </CssBaseline>
 
+  )
+}
+ReactDOM.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>
-  // </Provider>
   ,
   document.getElementById('root')
 );
