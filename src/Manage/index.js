@@ -47,7 +47,7 @@ function ManagerList({ courseData }) {
             <ListItem divider button onClick={() => { setOpen(true) }}>
                 <ListItemText primary={courseData['courseName']} secondary={d} />
                 <ListItemSecondaryAction>
-                    <Switch color='primary' />
+                    <Button>刪除課程</Button>
                 </ListItemSecondaryAction>
             </ListItem>
             <Dialog
