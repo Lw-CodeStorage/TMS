@@ -4,6 +4,7 @@ import { Paper, Box, Grid, TextField, Typography, Button, AppBar, Toolbar, IconB
 import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
 import { makeStyles } from '@material-ui/core/styles';
+import {host} from '../url.js'
 let useStyles = makeStyles({
     root: {
     },
@@ -21,13 +22,13 @@ export default function Account() {
     function upload(e) {
         //e.preventDefault();
         let image = e.target.files[0]
-
         if (image) {
             if ((image.type == "image/jpg" || image.type == 'image/jpeg' || image.type == 'image/png') && image.size <= 1000000) {
                 let formData = new FormData()
-                formData.append('test', e.target.files[0], `${userReducer.email}`)
-
-                fetch('http://localhost:8888/upload/', {
+                formData.append('test', e.target.files[0], `${userReducer.email}`);
+                formData.append('type','個人照片上傳');
+                //console.log(formData.get('type'))
+                fetch('https://tms.fois.online/imgUpload', {
                     method: 'POST',
                     body: formData,
 
@@ -49,9 +50,9 @@ export default function Account() {
             console.log('沒有照片');
         }
     }
-    React.useEffect(() => {
-        console.log('123');
-    })
+    // React.useEffect(() => {
+    //     console.log('123');
+    // })
     return (
         <Box p={1} maxWidth={1200} margin='auto'>
             <Paper>
@@ -98,7 +99,7 @@ export default function Account() {
                                 <label htmlFor="imageUpload">
                                     <Button fullWidth size='small' variant="contained" color="primary" component="span">
                                         Upload
-                                 </Button>
+                                    </Button>
                                 </label>
                             </Grid>
                         </Grid>

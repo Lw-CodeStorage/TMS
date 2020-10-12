@@ -25,7 +25,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 
 import { useDispatch, useSelector } from 'react-redux'
 import allReducer from '../reducers';
-
+import {host} from '../url.js'
 const useStyles = makeStyles((theme) => ({
     title: {
         flexGrow: 1,
@@ -66,19 +66,20 @@ export default function MenuBar() {
             // console.log('登出');
         } else {
             dispatch({ type: 'IS_LOGIN' })
-            fetch('http://localhost:8888/userData/', {
+            fetch(host, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
                 body: JSON.stringify({
+                    type:'使用者資料',
                     email: state
                 }),
             }).then(res => {
                 return res.json()
             }).then(res => {
                 if (res.狀態 == '查詢成功') {
-                    dispatch({ type: 'USER_DATA', data: res['訊息'] })
+                    dispatch({ type: 'USER_DATA', data: res['訊息'] ,severity:'error'})
                 }
             })
         }
@@ -119,7 +120,7 @@ export default function MenuBar() {
                 </Typography>
                 {loginReducer ?
                     <>
-                        <Avatar alt="?" src={`http://localhost:8888/image?email=${userReducer.email}`} style={{ width: 32, height: 32, cursor: 'pointer' }} onClick={handleClick} />
+                        <Avatar alt="?" src={`https://tms.fois.online/imgUpload/upload/${userReducer.email}.jpg`} style={{ width: 32, height: 32, cursor: 'pointer' }} onClick={handleClick} />
                         <Popover
                             id='menuPopover'
                             open={open}
@@ -138,7 +139,7 @@ export default function MenuBar() {
                                 <Box p={2}>
                                     <Grid container spacing={2} wrap='nowrap'>
                                         <Grid item >
-                                            <Avatar alt="?" src={`http://localhost:8888/image?email=${userReducer.email}`} style={{ width: 32, height: 32 }} />
+                                            <Avatar alt="?" src={`https://tms.fois.online/imgUpload/upload/${userReducer.email}.jpg`} style={{ width: 32, height: 32 }} />
 
                                         </Grid>
 
@@ -162,6 +163,12 @@ export default function MenuBar() {
                                                 <DraftsIcon />
                                             </ListItemIcon>
                                             <ListItemText primary="開設課程" />
+                                        </ListItem>
+                                        <ListItem button dense onClick={()=>{ history.push('./管理')}}>
+                                            <ListItemIcon>
+                                                <DraftsIcon />
+                                            </ListItemIcon>
+                                            <ListItemText primary="管理" />
                                         </ListItem>
                                         <ListItem button dense onClick={logout}>
                                             <ListItemIcon>

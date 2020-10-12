@@ -22,7 +22,7 @@ import Slide from '@material-ui/core/Slide';
 
 import Chip from '@material-ui/core/Chip';
 import DoneIcon from '@material-ui/icons/Done';
-
+import {host} from '../url.js'
 import { makeStyles } from '@material-ui/core/styles';
 const useStyles = makeStyles((theme) => ({
     root: {

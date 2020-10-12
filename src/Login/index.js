@@ -6,7 +6,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
 import { useDispatch, useSelector } from 'react-redux'
 import { red } from '@material-ui/core/colors';
-
+import {host} from '../url.js'
 let useStyles = makeStyles({
     root: {
         maxWidth: 1920,
@@ -34,27 +34,28 @@ export default function LoginPage() {
 
     function handleSubmit(e) {
         e.preventDefault();
-        fetch('http://localhost:8888/login/', {
+        fetch(host, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
             },
             body: JSON.stringify({
+                 type:'登入',
                  email: email.current,
                  password: pass.current,
-               // email: `adamwang1209@gmail.com`,
-                //password: `123`,
+             
             }),
         }).then(res => {
             return res.json()
         }).then(res => {
             console.log(res['狀態'])
-            if (res['狀態'] == '登入異常') {
-                dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
-            } else {
+            if (res['狀態'] == '登入成功') {
                 dispatch({ type: 'IS_LOGIN' })
                 document.cookie = `TMS=${email.current};max-age = 3600 path=/`
                 history.push('/')
+              
+            } else {
+                dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
             }
         })
     }

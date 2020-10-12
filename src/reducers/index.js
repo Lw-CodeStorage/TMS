@@ -31,20 +31,20 @@ let userReducer = (state = {}, action) => {
     }
 }
 
-let courseDetailReducer = (state={},action)=>{
-    switch(action.type){
-        case 'CourseDetail_Open':
-            return action.data
-        default:
-            return state
-    }
-}
+// let courseDetailReducer = (state={},action)=>{
+//     switch(action.type){
+//         case 'CourseDetail_Open':
+//             return action.data
+//         default:
+//             return state
+//     }
+// }
 
 let allReducer = combineReducers({
     snackBarReducer: snackBarReducer,
     loginReducer: loginReducer,
     userReducer: userReducer,
-    courseDetailReducer:courseDetailReducer,
+  //  courseDetailReducer:courseDetailReducer,
    
 })
 

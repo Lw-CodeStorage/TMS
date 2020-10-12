@@ -1,12 +1,12 @@
 import React from 'react';
-import {useHistory}from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { makeStyles } from '@material-ui/core/styles';
 import { Paper, Box, Grid, TextField, Typography, Button, } from '@material-ui/core'
 import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
 import { useDispatch, useSelector } from 'react-redux'
 import { red } from '@material-ui/core/colors';
-
+import { host } from '../url.js'
 let useStyles = makeStyles({
     root: {
         maxWidth: 1920,
@@ -35,7 +35,7 @@ export default function RegisterPage() {
 
     function handleSubmit(e) {
         e.preventDefault();
-        fetch('http://localhost:8888/register/', {
+        fetch(host, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8'
@@ -74,7 +74,25 @@ export default function RegisterPage() {
         // console.log(e.target.value);
     }
     function test() {
+        //console.log('backEnd');
+        fetch(`https://tms.fois.online/qwe`, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Access-Control-Allow-Origin': 'http://localhost:3000',
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: '測試',
+            }),
+            
+        }).then(res => {
+            console.log(res);
+            return res.json()
+        }).then(res => {
+            console.log(res)
 
+        })
     }
 
     return (
@@ -109,7 +127,9 @@ export default function RegisterPage() {
                                     <Grid item xs={12}>
                                         <Button type='submit' color='primary' variant="contained" fullWidth>註冊</Button>
                                     </Grid>
-                             
+                                    <Button color='primary' variant="contained" fullWidth onClick={test}>
+                                        測試
+                                      </Button>
                                 </Grid>
                             </form>
                         </Box>
@@ -117,11 +137,12 @@ export default function RegisterPage() {
                 </Grid>
             </Grid>
 
-            <Snackbar anchorOrigin={{ vertical:'top', horizontal:'right' }}open={snackBarReducer.open} autoHideDuration={3000} onClose={() => dispatch({ type: 'HIDEN' })}>
+            <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'right' }} open={snackBarReducer.open} autoHideDuration={3000} onClose={() => dispatch({ type: 'HIDEN' })}>
                 <Alert onClose={() => dispatch({ type: 'HIDEN' })} severity={snackBarReducer.severity}>
                     {snackBarReducer.text}
                 </Alert>
             </Snackbar>
+
         </>
 
     )
