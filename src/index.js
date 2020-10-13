@@ -20,7 +20,9 @@ import RegisterPage from './Register'
 import LoginPage from './Login'
 import Account from './Account'
 import OpenCourse from './OpenCourse'
+import OpenClass from './OpenClass'
 import Manage from './Manage';
+
 import theme from './theme.js'
 import { MuiThemeProvider, ThemeProvider } from '@material-ui/core/styles'
 let store = createStore(allReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
@@ -45,6 +47,7 @@ function App() {
                     <Route exact path="/"> <Main /> </Route>
                     <Route path="/帳戶"> <Account /> </Route>
                     <Route path="/開設課程"> <OpenCourse /></Route>
+                    <Route path="/開設班級"> <OpenClass/></Route>
                     <Route path="/管理"> <Manage/></Route>
                   </>
                   :
