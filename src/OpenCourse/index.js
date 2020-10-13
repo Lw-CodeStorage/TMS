@@ -554,22 +554,29 @@ export default function OpenCourse({ previewCourseData }) {
                                             <Divider style={{ marginTop: 10 }} />
                                         </Grid>
                                     </Grid>
+                                    {
+                                        previewCourseData ? null :
+                                            <>
+                                                <Grid item xs={12}>
 
-                                    <Grid item xs={12}>
-                                        <List dense>
-                                            {/* {console.log(pagination + 10)} */}
-                                            {UOCID.slice(pagination, pagination + 10).map((item, index) =>
+                                                    <List dense>
 
-                                                <ListItem button dense divider onClick={handleClickOpen('UOC', item['UOC_ID'])}>
-                                                    <ListItemText primary={item['UOC_ID']} secondary={item['UOC_TITLE']} />
-                                                </ListItem>
-                                            )}
-                                        </List>
+                                                        {UOCID.slice(pagination, pagination + 10).map((item, index) =>
 
-                                    </Grid>
-                                    <Grid item container xs={12} justify='center'>
-                                        <Pagination count={Math.ceil(UOCID.length / 10)} onChange={(e, value) => { setPagination((value - 1) * 10) }} size="small" fullWidth />
-                                    </Grid>
+                                                            <ListItem button dense divider onClick={handleClickOpen('UOC', item['UOC_ID'])}>
+                                                                <ListItemText primary={item['UOC_ID']} secondary={item['UOC_TITLE']} />
+                                                            </ListItem>
+                                                        )}
+                                                    </List>
+
+
+
+                                                </Grid>
+                                                <Grid item container xs={12} justify='center'>
+                                                    <Pagination count={Math.ceil(UOCID.length / 10)} onChange={(e, value) => { setPagination((value - 1) * 10) }} size="small" fullWidth />
+                                                </Grid>
+                                            </>
+                                    }
                                 </Grid>
                             </Box>
                             <Box p={2} pt={0} pb={1}>
@@ -585,22 +592,27 @@ export default function OpenCourse({ previewCourseData }) {
                                             <Divider style={{ marginTop: 10 }} />
                                         </Grid>
                                     </Grid>
+                                    {/* 偵測預覽關閉LIST */}
+                                    {previewCourseData ? null :
+                                        <>
+                                            <Grid item xs={12}>
 
-                                    <Grid item xs={12}>
-                                        <List dense>
-                                            {/* {console.log(pagination + 10)} */}
-                                            {Onet.slice(onetPagination, onetPagination + 10).map((item, index) =>
+                                                <List dense>
+                                                    {/* {console.log(pagination + 10)} */}
+                                                    {Onet.slice(onetPagination, onetPagination + 10).map((item, index) =>
 
-                                                <ListItem button dense divider onClick={handleClickOpen('Onet', item['soc_id'])}>
-                                                    <ListItemText primary={item['soc_id']} secondary={item['soc_title']} />
-                                                </ListItem>
-                                            )}
-                                        </List>
+                                                        <ListItem button dense divider onClick={handleClickOpen('Onet', item['soc_id'])}>
+                                                            <ListItemText primary={item['soc_id']} secondary={item['soc_title']} />
+                                                        </ListItem>
+                                                    )}
+                                                </List>
 
-                                    </Grid>
-                                    <Grid item container xs={12} justify='center'>
-                                        <Pagination count={Math.ceil(Onet.length / 10)} onChange={(e, value) => { setOnetPagination((value - 1) * 10) }} size="small" fullWidth />
-                                    </Grid>
+                                            </Grid>
+                                            <Grid item container xs={12} justify='center'>
+                                                <Pagination count={Math.ceil(Onet.length / 10)} onChange={(e, value) => { setOnetPagination((value - 1) * 10) }} size="small" fullWidth />
+                                            </Grid>
+                                        </>
+                                    }
                                 </Grid>
                             </Box>
 
