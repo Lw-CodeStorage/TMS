@@ -107,9 +107,7 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
             })
         )
     }
-    React.useEffect(() => {
 
-    })
     //classes={{ text: classes.buttonTextColor }}
     return (
         <>

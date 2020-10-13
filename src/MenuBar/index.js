@@ -152,23 +152,29 @@ export default function MenuBar() {
                                 <Divider />
                                 {userReducer.Authority == "老師" ?
                                     <List >
-                                        <ListItem button dense onClick={() => { history.push('./帳戶') }}>
-                                            <ListItemIcon>
-                                                < SettingsIcon />
-                                            </ListItemIcon>
-                                            <ListItemText primary="管理帳戶" />
-                                        </ListItem>
                                         <ListItem button dense onClick={()=>{ history.push('./開設課程')}}>
                                             <ListItemIcon>
                                                 <DraftsIcon />
                                             </ListItemIcon>
                                             <ListItemText primary="開設課程" />
                                         </ListItem>
+                                        <ListItem button dense onClick={()=>{ history.push('./開設班級')}}>
+                                            <ListItemIcon>
+                                                <DraftsIcon />
+                                            </ListItemIcon>
+                                            <ListItemText primary="開設班級" />
+                                        </ListItem>
                                         <ListItem button dense onClick={()=>{ history.push('./管理')}}>
                                             <ListItemIcon>
                                                 <DraftsIcon />
                                             </ListItemIcon>
-                                            <ListItemText primary="管理" />
+                                            <ListItemText primary="課程/班級 管理" />
+                                        </ListItem>
+                                        <ListItem button dense onClick={() => { history.push('./帳戶') }}>
+                                            <ListItemIcon>
+                                                < SettingsIcon />
+                                            </ListItemIcon>
+                                            <ListItemText primary="管理帳戶" />
                                         </ListItem>
                                         <ListItem button dense onClick={logout}>
                                             <ListItemIcon>
@@ -176,6 +182,7 @@ export default function MenuBar() {
                                             </ListItemIcon>
                                             <ListItemText primary="登出" />
                                         </ListItem>
+                                        
                                     </List>
                                     : <List >
                                         <ListItem button dense onClick={() => { history.push('./帳戶') }}>
