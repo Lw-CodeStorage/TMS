@@ -469,7 +469,6 @@ export default function OpenCourse({ previewCourseData }) {
                                             <Divider style={{ marginTop: 10 }} />
                                         </Grid>
                                     </Grid>
-
                                     <Grid item xs={12}>
                                         <TextField variant="outlined" fullWidth multiline rowsMax='10' rows='10' label="P.S." onChange={(e) => { courseInfo.current = e.target.value }} value={courseInfo.current} disabled={previewCourseData ? true : false} />
 
