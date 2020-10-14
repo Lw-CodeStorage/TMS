@@ -28,16 +28,17 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+import { DatePicker, DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DateFnsUtils from '@date-io/date-fns';
 import twLocale from "date-fns/locale/zh-TW"; //日期語言包
 
 import { host } from '../url.js'
 import OpenCourse from '../OpenCourse'
+import { setDayOfYear } from 'date-fns/fp';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        whiteSpace: 'normal !important'
+    dialogMargin: {
+        margin: '5px !important'
     },
     appBar: {
         position: 'fixed',
@@ -51,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Transition(props) {
     //console.log(props);
-    return <Slide direction="left" {...props} />;
+    return <Slide direction="up" {...props} />;
 }
 
 export default function OpenClass({ previewCourseData }) {
@@ -71,13 +72,18 @@ export default function OpenClass({ previewCourseData }) {
     let imageFile = React.useRef(null)//照片檔案
     let [courseImage, setCourseImage] = React.useState(null)//照片預覽
     let [open, setOpen] = React.useState(false);//課程清單彈窗
-    let courseData = React.useRef(null)//課程清單LIST 選中的課程資訊 帶出去存給下一個dialog用   
     let [previewCourse, setPreviewCourse] = React.useState(false)//預覽課程彈窗
+    let [timeDialog, setTimeDialog] = React.useState(false)//新曾課程時帶出時間設定的dialog
+    let selectCourseData = React.useRef(null)//課程清單LIST 選中的課程資訊 帶出去存給下一個dialog用   
+
 
     let [course, setCourse] = React.useState([])//該帳戶創建過的course
     let [inClassCourse, setInClassCourse] = React.useState([])//在班級中被新增的課程
 
-    const [selectedDate, handleDateChange] = React.useState(new Date()); //日期
+    let [classStartTime, setClassStartTime] = React.useState(new Date()); //班級開始日期
+    let [classEndTime, setClassEndTime] = React.useState(new Date()); //班級結束日期
+    let [courseStartTime, setCourseStartTime] = React.useState(new Date())//課程開始日期
+    let [courseEndTime, setCourseEndTime] = React.useState(new Date())//課程開始日期
     //照片預覽
     let courseImagePreview = (e) => {
         let reader = new FileReader()
@@ -118,15 +124,33 @@ export default function OpenClass({ previewCourseData }) {
     }
     //Dialog Course List 點下 預覽課程
     let dialogCourseListOnClick = (courseDataFromListItem) => () => {
-        courseData.current = courseDataFromListItem //帶出去存給下一個dialog用
+        selectCourseData.current = courseDataFromListItem //帶出去存給其他dialog用
         setPreviewCourse(true)
     }
-    //Dialog Course List 按鈕 點下 新增課程至 Class
+    //Dialog Course List 按鈕 點下'新增' 傳值過來
     let dialogCourseListaddCourseOnclick = (courseDataFromListItem) => () => {
-        setInClassCourse([...inClassCourse, courseDataFromListItem])
-        dispatch({ type: 'SHOW', text: '新增課程成功', severity: 'success' })
+        selectCourseData.current = courseDataFromListItem //帶出去存給其他dialog用
+        setTimeDialog(true)
     }
 
+    let dialogCourseTimeSettingComplete = () => {
+        //選到0-9會只有一個數字出現，最後做了一個判斷去整形一下
+
+        let StartTime = `${courseStartTime.getFullYear()}/${courseStartTime.getMonth() + 1}/${courseStartTime.getDate()} ${courseStartTime.getHours()}:${courseStartTime.getMinutes() < 9 ? `${'0' + courseStartTime.getMinutes()}` : courseStartTime.getMinutes()}`
+        let EndTime = `${courseEndTime.getFullYear()}/${courseEndTime.getMonth() + 1}/${courseEndTime.getDate()} ${courseEndTime.getHours()}:${courseEndTime.getMinutes() < 9 ? `${'0' + courseEndTime.getMinutes()}` : courseEndTime.getMinutes()}`
+
+        setInClassCourse([...inClassCourse, {...selectCourseData.current,'startTime':StartTime,'endTime':EndTime}])
+        setTimeDialog(false)
+    }
+
+    let deleteCourse = (deleteItem)=>()=>{
+        let newCourseList = inClassCourse.filter(item => item != deleteItem)
+        setInClassCourse([...newCourseList])
+    }
+
+    React.useEffect(() => {
+        console.log(inClassCourse);
+    }, [inClassCourse])
     return (
         <>
             <form onSubmit={handleSubmit}>
@@ -212,12 +236,12 @@ export default function OpenClass({ previewCourseData }) {
                                             <MuiPickersUtilsProvider utils={DateFnsUtils} locale={twLocale}>
                                                 <DatePicker
                                                     fullWidth
-                                                    value={selectedDate}
+                                                    value={classStartTime}
                                                     inputVariant="outlined"
                                                     format="yyyy/MM/dd"
                                                     label='開始日期'
                                                     size='small'
-                                                    onChange={handleDateChange} />
+                                                    onChange={setClassStartTime} />
                                             </MuiPickersUtilsProvider>
                                         </Grid>
 
@@ -225,12 +249,12 @@ export default function OpenClass({ previewCourseData }) {
                                             <MuiPickersUtilsProvider utils={DateFnsUtils} locale={twLocale}>
                                                 <DatePicker
                                                     fullWidth
-                                                    value={selectedDate}
+                                                    value={classEndTime}
                                                     inputVariant="outlined"
                                                     format="yyyy/MM/dd"
                                                     label='結束日期'
                                                     size='small'
-                                                    onChange={handleDateChange} />
+                                                    onChange={setClassEndTime} />
                                             </MuiPickersUtilsProvider>
                                         </Grid>
 
@@ -253,34 +277,18 @@ export default function OpenClass({ previewCourseData }) {
                                     <List>
                                         {
                                             inClassCourse.map(item =>
-                                                <ListItem divider>
-                                                    <ListItemText primary={item['courseName']} />
-                                                    <MuiPickersUtilsProvider utils={DateFnsUtils} locale={twLocale}>
-                                                        <DatePicker
-                                                            style={{ width: 120 }}
-                                                            value={selectedDate}
-                                                            inputVariant="outlined"
-                                                            format="yyyy/MM/dd"
-                                                            label='開始'
-                                                            size='small'
-                                                            onChange={handleDateChange} />
-                                                    </MuiPickersUtilsProvider>
-                                                    -
-                                                    <MuiPickersUtilsProvider utils={DateFnsUtils} locale={twLocale}>
-                                                        <DatePicker
-                                                            style={{ width: 120 }}
-                                                            value={selectedDate}
-                                                            inputVariant="outlined"
-                                                            format="yyyy/MM/dd"
-                                                            label='結束'
-                                                            size='small'
-                                                            onChange={handleDateChange} />
-                                                    </MuiPickersUtilsProvider>
+                                                <ListItem divider disableGutters dense>
+                                                    <ListItemText primary={item['courseName']} secondary={`${item.startTime} ~ ${item.endTime}`} />
+                                                    <ListItemSecondaryAction>
+                                                        <Button onClick={deleteCourse(item)}>
+                                                            刪除
+                                                        </Button>
+                                                    </ListItemSecondaryAction>
                                                 </ListItem>
                                             )
                                         }
                                     </List>
-                                    <Button color='primary' fullWidth onClick={addCourseOnclick}>
+                                    <Button color='primary' variant='outlined' fullWidth onClick={addCourseOnclick}>
                                         增加課程
                                 </Button>
                                 </Box>
@@ -300,6 +308,7 @@ export default function OpenClass({ previewCourseData }) {
 
 
             </form>
+            {/* 預覽已開課程清單 */}
             <Dialog
                 open={open}
                 onClose={() => { setOpen(false) }}
@@ -307,16 +316,16 @@ export default function OpenClass({ previewCourseData }) {
                 aria-describedby="alert-dialog-description"
                 maxWidth='sm'
                 fullWidth
-                classes={{ paper: classes.root }}
+                scroll={'paper'}
             >
-                <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
+                <DialogTitle id="alert-dialog-title">{"已新增的課程"}</DialogTitle>
                 <DialogContent>
                     <List>
                         {course.map(item =>
-                            <ListItem divider button onClick={dialogCourseListOnClick(item)} >
+                            <ListItem dense divider button onClick={dialogCourseListOnClick(item)} >
                                 <ListItemText primary={item['courseName']} />
                                 <ListItemSecondaryAction>
-                                    <Button onClick={dialogCourseListaddCourseOnclick(item)}>新增</Button>
+                                    <Button onClick={dialogCourseListaddCourseOnclick(item)} color='primary'>新增</Button>
                                 </ListItemSecondaryAction>
                             </ListItem>
 
@@ -324,34 +333,81 @@ export default function OpenClass({ previewCourseData }) {
                     </List>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => { setOpen(false) }} color="primary" autoFocus>
+                    <Button size='small' variant='contained' onClick={() => { setOpen(false) }} color="primary" autoFocus>
                         關閉
                     </Button>
                 </DialogActions>
             </Dialog>
+            {/* 新增課程時設定時間 */}
+            <Dialog
+                open={timeDialog}
+                TransitionComponent={Transition}
+                maxWidth='sm'
+                fullWidth
+                onClose={() => { setTimeDialog(false) }}
 
+            >
+                <DialogTitle id="alert-dialog-slide-title">{"設定上課時間"}</DialogTitle>
+                <DialogContent>
+                    <Grid container alignItems='center' justify='space-around' spacing={2}>
+                        <Grid item>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils} locale={twLocale}>
+                                <DateTimePicker
+                                    value={courseStartTime}
+                                    inputVariant="outlined"
+                                    format="yyyy/MM/dd hh:mm a"
+                                    label='開始'
+                                    size='small'
+                                    onChange={setCourseStartTime} />
+                            </MuiPickersUtilsProvider>
+                        </Grid>
 
+                        <Grid item> <MuiPickersUtilsProvider utils={DateFnsUtils} locale={twLocale}>
+                            <DateTimePicker
 
-            <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'right' }} open={snackBarReducer.open} autoHideDuration={3000} onClose={() => dispatch({ type: 'HIDEN' })}>
-                <Alert onClose={() => dispatch({ type: 'HIDEN' })} severity={snackBarReducer.severity}>
-                    {snackBarReducer.text}
-                </Alert>
-            </Snackbar>
+                                value={courseEndTime}
+                                inputVariant="outlined"
+                                format="yyyy/MM/dd hh:mm a"
+                                label='結束'
+                                size='small'
+                                onChange={setCourseEndTime} />
+                        </MuiPickersUtilsProvider></Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={dialogCourseTimeSettingComplete} color="primary">
+                        確定
+                     </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* 預覽課程 */}
             <Dialog
                 open={previewCourse}
                 onClose={() => { setPreviewCourse(false) }}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
-                fullScreen
-                classes={{ paper: classes.root }}
+                maxWidth='lg'
+                classes={{
+                    paper: classes.dialogMargin
+                }}
+                scroll={'paper'}
+
             >
-                <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
-                <OpenCourse previewCourseData={courseData.current} />
+                <DialogContent style={{ padding: 0 }}>
+                    <OpenCourse previewCourseData={selectCourseData.current} />
+                </DialogContent>
+
                 <DialogActions>
-                    <Button onClick={() => { setPreviewCourse(false) }} color="primary" autoFocus>
+                    <Button size='small' variant='contained' onClick={() => { setPreviewCourse(false) }} color="primary" autoFocus>
                         關閉
                     </Button>
                 </DialogActions>
             </Dialog>
+            <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'right' }} open={snackBarReducer.open} autoHideDuration={3000} onClose={() => dispatch({ type: 'HIDEN' })}>
+                <Alert onClose={() => dispatch({ type: 'HIDEN' })} severity={snackBarReducer.severity}>
+                    {snackBarReducer.text}
+                </Alert>
+            </Snackbar>
         </>)
 }
