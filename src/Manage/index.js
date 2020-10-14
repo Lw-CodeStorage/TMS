@@ -24,7 +24,7 @@ import { useTheme } from '@material-ui/core/styles';
 import { orange, red } from '@material-ui/core/colors';
 
 
-function CourseManagerList({ courseData ,setCourseFromManage}) {
+function CourseManagerList({ courseData, setCourseFromManage }) {
     let loginReducer = useSelector(state => state.loginReducer)
     let userReducer = useSelector(state => state.userReducer)
     let dispatch = useDispatch()
@@ -33,8 +33,8 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
         root: {
             margin: '5px !important'
         },
-        btn:{
-            color:theme.palette.error.main
+        btn: {
+            color: theme.palette.error.main
         }
         // btn: props => {
         //     return{
@@ -45,7 +45,7 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
         //         // }      
         //     }
         // },
-    
+
         // btn:{
         //     color:'red',
         //     //Mui斷點寫法
@@ -53,7 +53,7 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
         //         color:'blue'
         //     }
         // }
-    
+
     }))
     const classes = useStyles(false);
 
@@ -64,7 +64,7 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
     let [open, setOpen] = React.useState(false);
     let handleClose = () => { setOpen(false) };
 
-    function deleteCourseOnClick(e){
+    function deleteCourseOnClick(e) {
         //console.log(e.currentTarget.getAttribute('data-id'))
         fetch(host, {
             method: 'POST',
@@ -73,7 +73,7 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
             },
             body: JSON.stringify({
                 type: '刪除課程',
-                deleteCourseID:e.currentTarget.getAttribute('data-id')
+                deleteCourseID: e.currentTarget.getAttribute('data-id')
             }),
 
         }).then(res => {
@@ -94,7 +94,7 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
                 body: JSON.stringify({
                     type: '取得課程',
                 }),
-    
+
             }).then(res => {
                 return res.json()
             }).then(res => {
@@ -114,7 +114,7 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
             <ListItem divider button onClick={() => { setOpen(true) }}>
                 <ListItemText primary={courseData['courseName']} secondary={d} />
                 <ListItemSecondaryAction>
-                     {/* 也可用閉包 在onClick的時候傳 */}
+                    {/* 也可用閉包 在onClick的時候傳 */}
                     <Button data-id={`${courseData.id}`} className={classes.btn} onClick={deleteCourseOnClick}>刪除課程</Button>
                 </ListItemSecondaryAction>
             </ListItem>
@@ -125,9 +125,12 @@ function CourseManagerList({ courseData ,setCourseFromManage}) {
                 aria-describedby="alert-dialog-description"
                 maxWidth='lg'
                 classes={{ paper: classes.root }}
+                scroll={'paper'}
             >
-                <DialogTitle id="alert-dialog-title">{"Use Google's location service?"}</DialogTitle>
-                <OpenCourse previewCourseData={courseData} />
+               
+                <DialogContent style={{padding: 0}}>
+                    <OpenCourse previewCourseData={courseData} />
+                </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose} color="primary" autoFocus>
                         關閉
