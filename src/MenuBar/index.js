@@ -115,7 +115,7 @@ export default function MenuBar() {
         < AppBar position="static">
             <Toolbar variant="dense">
 
-                <Typography variant='title' className={classes.title} onClick={() => { history.push('/') }}>
+                <Typography  className={classes.title} onClick={() => { history.push('/') }}>
                     人才發展管理系統
                 </Typography>
                 {loginReducer ?
