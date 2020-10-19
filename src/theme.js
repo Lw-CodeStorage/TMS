@@ -15,6 +15,9 @@ const theme = createMuiTheme({
             main: '#f44336',
             contrastText: '#ffffff'
         },
+        facebook:{
+            background: '#3b5998'
+        },
         error:{
             main:'#f44336'
         }
