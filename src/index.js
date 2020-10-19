@@ -40,7 +40,7 @@ function App() {
         <Router>
           <MenuBar />
           <Switch>
-            {loginReducer ?
+            {
               <>
                 {userReducer['Authority'] == '老師' ?
                   <>
@@ -56,11 +56,6 @@ function App() {
                     <Route path="/帳戶"> <Account /> </Route>
                   </>
                 }
-              </> :
-              <>
-                <Route exact path="/"> <Main /> </Route>
-                <Route path="/登入"> <LoginPage /> </Route>
-                <Route path="/註冊"> <RegisterPage /> </Route>
               </>
             }
           </Switch>
