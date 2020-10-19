@@ -6,8 +6,9 @@ import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
 import { useDispatch, useSelector } from 'react-redux'
 import { red } from '@material-ui/core/colors';
-import {host} from '../url.js'
-let useStyles = makeStyles({
+import FacebookLogin from 'react-facebook-login'
+import { host } from '../url.js'
+let useStyles = makeStyles((theme)=>({
     root: {
         maxWidth: 1920,
         height: '100vh',
@@ -18,8 +19,21 @@ let useStyles = makeStyles({
         margin: 'auto',
         maxWidth: 350,
 
+    },
+    fbButton:{
+        width: '100%',
+        background: theme.palette.facebook.background,
+        color: 'white',
+        border: '0px',
+        height:'40px',
+        borderRadius:5,
+        outline:'none',
+        cursor:'pointer',
+        '&:active':{
+            opacity: 0.8
+        }
     }
-})
+}))
 
 export default function LoginPage() {
     let classes = useStyles()
@@ -40,10 +54,10 @@ export default function LoginPage() {
                 'Content-Type': 'application/json; charset=utf-8'
             },
             body: JSON.stringify({
-                 type:'登入',
-                 email: email.current,
-                 password: pass.current,
-             
+                type: '登入',
+                email: email.current,
+                password: pass.current,
+
             }),
         }).then(res => {
             return res.json()
@@ -53,7 +67,7 @@ export default function LoginPage() {
                 dispatch({ type: 'IS_LOGIN' })
                 document.cookie = `TMS=${email.current};max-age = 3600 path=/`
                 history.push('/')
-              
+
             } else {
                 dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
             }
@@ -73,6 +87,7 @@ export default function LoginPage() {
 
     return (
         <>
+        
             <Grid container className={classes.root} justify='center' alignContent='center' >
                 <Grid item xs={12} style={{ marginBottom: 8 }}>
                     <Typography color='primary' variant='h5' align='center' >TMS 人才管理系統登入</Typography>
@@ -81,13 +96,13 @@ export default function LoginPage() {
                 <Grid item xs={12} >
                     <Paper className={classes.parper}>
                         <Box p={2}>
-                            <form onSubmit={handleSubmit}>
+                            {/* <form onSubmit={handleSubmit}>
                                 <Grid container spacing={2}>
                                     <Grid item xs={12}>
                                         <TextField id="outlined-basic" label="電子信箱" variant="outlined" size='small' onChange={handleEmailInput} fullWidth required />
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <TextField id="outlined-basic"  label="密碼" variant="outlined" size='small' onChange={handlePassInput} fullWidth  required/>
+                                        <TextField id="outlined-basic" label="密碼" variant="outlined" size='small' onChange={handlePassInput} fullWidth required />
                                     </Grid>
                                 </Grid>
 
@@ -97,7 +112,15 @@ export default function LoginPage() {
                                     </Grid>
 
                                 </Grid>
-                            </form>
+                            </form> */}
+
+                            <FacebookLogin
+                                cssClass={classes.fbButton}
+                                appId="3401066723316419"
+                                autoLoad={true}
+                                fields="name,email,picture"
+                                callback={(response) => { console.log(response); }}
+                            />
                         </Box>
                     </Paper>
                 </Grid>
