@@ -25,12 +25,26 @@ import SettingsIcon from '@material-ui/icons/Settings';
 
 import { useDispatch, useSelector } from 'react-redux'
 import allReducer from '../reducers';
-import {host} from '../url.js'
+import FacebookLogin from 'react-facebook-login'
+import { host } from '../url.js'
 const useStyles = makeStyles((theme) => ({
     title: {
         flexGrow: 1,
     },
-
+    fbButton: {
+        width: '100%',
+        background: theme.palette.facebook.background,
+        color: 'white',
+        border: '0px',
+        height: '32px',
+        borderRadius: '50%',
+        outline: 'none',
+        cursor: 'pointer',
+        width: '32px',
+        '&:active': {
+            opacity: 0.8
+        }
+    }
 }));
 export default function MenuBar() {
     let classes = useStyles();
@@ -52,70 +66,99 @@ export default function MenuBar() {
         setOpen(false)
     }
     //偵測 每次重整的登入狀況 重整會導致state回到初始狀態
-    React.useEffect(() => {
-        let cookies = document.cookie.split(';')
-        let state = ''
-        for (let i = 0; i < cookies.length; i++) {
-            if (cookies[i].indexOf('TMS') >= 0) {
-                state = cookies[i].split('=')[1]
-                // console.log(state);
-            }
-        }
-        if (state == '') {
-            dispatch({ type: 'IS_LOGOUT' })
-            // console.log('登出');
-        } else {
-            dispatch({ type: 'IS_LOGIN' })
+    // React.useEffect(() => {
+    //     let cookies = document.cookie.split(';')
+    //     let state = ''
+    //     for (let i = 0; i < cookies.length; i++) {
+    //         if (cookies[i].indexOf('TMS') >= 0) {
+    //             state = cookies[i].split('=')[1]
+    //             // console.log(state);
+    //         }
+    //     }
+    //     if (state == '') {
+    //         dispatch({ type: 'IS_LOGOUT' })
+    //         // console.log('登出');
+    //     } else {
+    //         dispatch({ type: 'IS_LOGIN' })
+    //         fetch(host, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json; charset=utf-8'
+    //             },
+    //             body: JSON.stringify({
+    //                 type: '使用者資料',
+    //                 email: state
+    //             }),
+    //         }).then(res => {
+    //             return res.json()
+    //         }).then(res => {
+    //             if (res.狀態 == '查詢成功') {
+    //                 dispatch({ type: 'USER_DATA', data: res['訊息'], severity: 'error' })
+    //             }
+    //         })
+    //     }
+    // }, [loginReducer])
+
+    // //偵測 畫面停滯時間
+    // setInterval(() => {
+    //     let cookies = document.cookie.split(';')
+    //     let state = ''
+    //     for (let i = 0; i < cookies.length; i++) {
+    //         if (cookies[i].indexOf('TMS') >= 0) {
+    //             state = cookies[i].split('=')[1]
+    //             //console.log(state);
+    //         }
+    //     }
+    //     if (state == '') {
+    //         dispatch({ type: 'IS_LOGOUT' })
+    //         // console.log('登出');
+    //     } else {
+    //         // console.log('登入中..');
+    //     }
+    // }, 4000);
+
+    // function logout() {
+    //     history.push('/登入')
+    //     document.cookie = `TMS='';max-age =0; path=/`;
+    //     handleClose()
+
+    // }
+    // React.useEffect(() => { })
+    let fbResponse = (response) => {
+        // console.log(response)
+        if (response.email) {
             fetch(host, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
                 body: JSON.stringify({
-                    type:'使用者資料',
-                    email: state
+                    type: 'FB',
+                    email: response.email,
+                    name:response.name,
+                    picture:response.picture.data.url
                 }),
             }).then(res => {
                 return res.json()
             }).then(res => {
                 if (res.狀態 == '查詢成功') {
-                    dispatch({ type: 'USER_DATA', data: res['訊息'] ,severity:'error'})
+                    console.log(res.訊息)
+                     dispatch({ type: 'USER_DATA', data: res['訊息'] })
+                     dispatch({ type: 'IS_LOGIN' })
                 }
             })
-        }
-    }, [loginReducer])
-    React.useEffect(() => {
-        // console.log('我是被reducer更新所觸發');
-    })
-    //偵測 畫面停滯時間
-    setInterval(() => {
-        let cookies = document.cookie.split(';')
-        let state = ''
-        for (let i = 0; i < cookies.length; i++) {
-            if (cookies[i].indexOf('TMS') >= 0) {
-                state = cookies[i].split('=')[1]
-                //console.log(state);
-            }
-        }
-        if (state == '') {
-            dispatch({ type: 'IS_LOGOUT' })
-            // console.log('登出');
+           
+            //console.log(loginReducer)
         } else {
-            // console.log('登入中..');
+            console.log('沒登');
         }
-    }, 4000);
-
-    function logout() {
-        history.push('/登入')
-        document.cookie = `TMS='';max-age =0; path=/`;
-        handleClose()
 
     }
     return (
         < AppBar position="static">
             <Toolbar variant="dense">
 
-                <Typography  className={classes.title} onClick={() => { history.push('/') }}>
+                <Typography className={classes.title} onClick={() => { history.push('/') }}>
                     人才發展管理系統
                 </Typography>
                 {loginReducer ?
@@ -152,19 +195,19 @@ export default function MenuBar() {
                                 <Divider />
                                 {userReducer.Authority == "老師" ?
                                     <List >
-                                        <ListItem button dense onClick={()=>{ history.push('./開設課程')}}>
+                                        <ListItem button dense onClick={() => { history.push('./開設課程') }}>
                                             <ListItemIcon>
                                                 <DraftsIcon />
                                             </ListItemIcon>
                                             <ListItemText primary="開設課程" />
                                         </ListItem>
-                                        <ListItem button dense onClick={()=>{ history.push('./開設班級')}}>
+                                        <ListItem button dense onClick={() => { history.push('./開設班級') }}>
                                             <ListItemIcon>
                                                 <DraftsIcon />
                                             </ListItemIcon>
                                             <ListItemText primary="開設班級" />
                                         </ListItem>
-                                        <ListItem button dense onClick={()=>{ history.push('./管理')}}>
+                                        <ListItem button dense onClick={() => { history.push('./管理') }}>
                                             <ListItemIcon>
                                                 <DraftsIcon />
                                             </ListItemIcon>
@@ -176,13 +219,8 @@ export default function MenuBar() {
                                             </ListItemIcon>
                                             <ListItemText primary="管理帳戶" />
                                         </ListItem>
-                                        <ListItem button dense onClick={logout}>
-                                            <ListItemIcon>
-                                                <DraftsIcon />
-                                            </ListItemIcon>
-                                            <ListItemText primary="登出" />
-                                        </ListItem>
-                                        
+
+
                                     </List>
                                     : <List >
                                         <ListItem button dense onClick={() => { history.push('./帳戶') }}>
@@ -191,12 +229,7 @@ export default function MenuBar() {
                                             </ListItemIcon>
                                             <ListItemText primary="管理帳戶" />
                                         </ListItem>
-                                        <ListItem button dense onClick={logout}>
-                                            <ListItemIcon>
-                                                <DraftsIcon />
-                                            </ListItemIcon>
-                                            <ListItemText primary="登出" />
-                                        </ListItem>
+
                                     </List>}
 
 
@@ -204,9 +237,15 @@ export default function MenuBar() {
                         </Popover>
                     </> :
                     <>
-                        <Button color="inherit" onClick={() => { history.push('/登入') }}>登入</Button>
-                        ｜
-                        <Button color="inherit" onClick={() => { history.push('/註冊') }}>註冊</Button>
+                        <FacebookLogin
+                            cssClass={classes.fbButton}
+                            appId="3401066723316419"
+                            autoLoad={true}
+                            fields="name,email,picture"
+                            icon="fa-facebook"
+                            textButton=''
+                            callback={fbResponse}
+                        />
                     </>
                 }
             </Toolbar>
