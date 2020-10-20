@@ -163,7 +163,7 @@ export default function MenuBar() {
                 </Typography>
                 {loginReducer ?
                     <>
-                        <Avatar alt="?" src={`https://tms.fois.online/imgUpload/upload/${userReducer.email}.jpg`} style={{ width: 32, height: 32, cursor: 'pointer' }} onClick={handleClick} />
+                        <Avatar alt="?" src={`${userReducer.picture}`} style={{ width: 40, height: 40, cursor: 'pointer' }} onClick={handleClick} />
                         <Popover
                             id='menuPopover'
                             open={open}
@@ -182,7 +182,7 @@ export default function MenuBar() {
                                 <Box p={2}>
                                     <Grid container spacing={2} wrap='nowrap'>
                                         <Grid item >
-                                            <Avatar alt="?" src={`https://tms.fois.online/imgUpload/upload/${userReducer.email}.jpg`} style={{ width: 32, height: 32 }} />
+                                            <Avatar alt="?" src={userReducer.picture} style={{ width: 32, height: 32 }} />
 
                                         </Grid>
 
