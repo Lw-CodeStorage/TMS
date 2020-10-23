@@ -17,8 +17,8 @@ import { CssBaseline } from '@material-ui/core'
 import Main from './Main'
 import MenuBar from './MenuBar'
 import RegisterPage from './Register'
-import LoginPage from './Login'
-import Account from './Account'
+import LoginPage from './(N)Login'
+import Account from './(N)Account'
 import OpenCourse from './OpenCourse'
 import OpenClass from './OpenClass'
 import Manage from './Manage';
@@ -45,7 +45,7 @@ function App() {
                 {userReducer['Authority'] == '老師' ?
                   <>
                     <Route exact path="/"> <Main /> </Route>
-                    <Route path="/帳戶"> <Account /> </Route>
+                    {/* <Route path="/帳戶"> <Account /> </Route> */}
                     <Route path="/開設課程"> <OpenCourse /></Route>
                     <Route path="/開設班級"> <OpenClass/></Route>
                     <Route path="/管理"> <Manage/></Route>
