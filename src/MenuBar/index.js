@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-router-dom";
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -121,11 +121,40 @@ export default function MenuBar() {
     //     history.push('/登入')
     //     document.cookie = `TMS='';max-age =0; path=/`;
     //     handleClose()
-
     // }
-    // React.useEffect(() => { })
+
+    React.useEffect(() => {
+        let cookies = document.cookie.split(';')
+        let state = ''
+        for (let i = 0; i < cookies.length; i++) {
+            if (cookies[i].indexOf('TMS') >= 0) {
+                state = cookies[i].split('=')[1]
+                // console.log(state);
+            }
+        }
+        if (state != '') {
+            dispatch({ type: 'IS_LOGIN' })
+            fetch(host, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                body: JSON.stringify({
+                    type: '使用者資料',
+                    email: state
+                }),
+            }).then(res => {
+                return res.json()
+            }).then(res => {
+                if (res.狀態 == '查詢成功') {
+                    dispatch({ type: 'USER_DATA', data: res['訊息'], severity: 'error' })
+                }
+            })
+        }
+    }, [])
+
     let fbResponse = (response) => {
-        // console.log(response)
+        //console.log(response)
         if (response.email) {
             fetch(host, {
                 method: 'POST',
@@ -135,25 +164,45 @@ export default function MenuBar() {
                 body: JSON.stringify({
                     type: 'FB',
                     email: response.email,
-                    name:response.name,
-                    picture:response.picture.data.url
+                    name: response.name,
+                    picture: response.picture.data.url
                 }),
             }).then(res => {
                 return res.json()
             }).then(res => {
                 if (res.狀態 == '查詢成功') {
-                    console.log(res.訊息)
-                     dispatch({ type: 'USER_DATA', data: res['訊息'] })
-                     dispatch({ type: 'IS_LOGIN' })
+                    // console.log(res.訊息)
+                    document.cookie = `TMS=${response.email};max-age = 3600 path=/`
+                    dispatch({ type: 'USER_DATA', data: res['訊息'] })
+                    dispatch({ type: 'IS_LOGIN' })
                 }
             })
-           
-            //console.log(loginReducer)
-        } else {
-            console.log('沒登');
-        }
 
+        } else {
+            console.log('FB沒登');
+        }
     }
+
+    let logout = ()=>{
+        document.cookie = `TMS='';max-age =0; path=/`;
+        dispatch({ type: 'IS_LOGOUT' }) 
+        history.push('/')
+    }
+    // let test = () => {
+    //     window.FB.getLoginStatus(function (response) {
+    //         if (response.status === 'connected') {
+    //             let me = window.FB.api('/me', function (response) {
+    //                 console.log(JSON.stringify(response));
+    //             });
+    //             console.log(me)
+    //             console.log(1)
+    //         } else if (response.status === 'not_authorized') {
+    //             console.log(2)
+    //         } else {
+    //             console.log(3)
+    //         }
+    //     });
+    // }
     return (
         < AppBar position="static">
             <Toolbar variant="dense">
@@ -213,13 +262,12 @@ export default function MenuBar() {
                                             </ListItemIcon>
                                             <ListItemText primary="課程/班級 管理" />
                                         </ListItem>
-                                        <ListItem button dense onClick={() => { history.push('./帳戶') }}>
+                                        <ListItem button dense onClick={logout}>
                                             <ListItemIcon>
-                                                < SettingsIcon />
+                                                <DraftsIcon />
                                             </ListItemIcon>
-                                            <ListItemText primary="管理帳戶" />
+                                            <ListItemText primary="登出" />
                                         </ListItem>
-
 
                                     </List>
                                     : <List >
@@ -229,7 +277,12 @@ export default function MenuBar() {
                                             </ListItemIcon>
                                             <ListItemText primary="管理帳戶" />
                                         </ListItem>
-
+                                        <ListItem button dense >
+                                            <ListItemIcon>
+                                                <DraftsIcon />
+                                            </ListItemIcon>
+                                            <ListItemText primary="登出" />
+                                        </ListItem>
                                     </List>}
 
 
@@ -240,7 +293,6 @@ export default function MenuBar() {
                         <FacebookLogin
                             cssClass={classes.fbButton}
                             appId="3401066723316419"
-                            autoLoad={true}
                             fields="name,email,picture"
                             icon="fa-facebook"
                             textButton=''
