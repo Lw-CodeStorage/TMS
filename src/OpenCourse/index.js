@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
 import { Paper, Box, Grid, TextField, Typography, Button, AppBar, Toolbar, IconButton, Avatar, Popover, Divider } from '@material-ui/core'
 import Snackbar from '@material-ui/core/Snackbar';
@@ -50,13 +51,14 @@ export default function OpenCourse({ previewCourseData }) {
     //取值
     let snackBarReducer = useSelector(state => state.snackBarReducer)
     let userReducer = useSelector(state => state.userReducer)
-
     //寫值
     let dispatch = useDispatch()
+    //react-router
+    let history = useHistory()
 
     let courseName = React.useRef(previewCourseData ? previewCourseData.courseName : null)
     let courseLink = React.useRef(previewCourseData ? previewCourseData.courseLink : null)//課程連結
-    let courseInfo = React.useRef(previewCourseData ? previewCourseData.courseInfo : null)//課程自由填寫資訊
+    let courseInfo = React.useRef(previewCourseData ? previewCourseData.courseInfo : '')//課程自由填寫資訊
 
     //let imageFile = React.useRef(null)//照片
     let [courseImage, setCourseImage] = React.useState(null)
@@ -385,9 +387,10 @@ export default function OpenCourse({ previewCourseData }) {
                 return res.json()
             }).then(res => {
                 if (res['狀態'] == '課程開設成功') {
-                    //dispatch({ type: 'SHOW', text: res['訊息'], severity: 'success' })
+                    dispatch({ type: 'SHOW', text: res['訊息'], severity: 'success' })
+                    history.push('/管理')
                 } else {
-                    //dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
+                    dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
                 }
             })
         }
@@ -440,7 +443,7 @@ export default function OpenCourse({ previewCourseData }) {
                                         <Divider style={{ marginTop: 10 }} />
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { courseName.current = e.target.value }} value={courseName.current} disabled={previewCourseData ? true : false} />
+                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { courseName.current = e.target.value }} value={courseName.current} disabled={previewCourseData ? true : false} required/>
                                     </Grid>
                                 </Grid>
                             </Box>

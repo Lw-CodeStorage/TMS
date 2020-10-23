@@ -1,7 +1,7 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useDispatch, useSelector } from 'react-redux'
-import { Paper, Box, Grid, TextField, Typography, Button, AppBar, Toolbar, IconButton, Avatar, Popover, Divider } from '@material-ui/core'
+import { Paper, Box, Grid, TextField, Typography, Button, AppBar, Toolbar, IconButton, Avatar, Popover, Divider, Switch } from '@material-ui/core'
 import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -35,6 +35,7 @@ import twLocale from "date-fns/locale/zh-TW"; //日期語言包
 
 import { host } from '../url.js'
 import OpenCourse from '../OpenCourse'
+import noImage from '../img/noimage.svg';
 import { setDayOfYear } from 'date-fns/fp';
 import { set } from 'date-fns';
 
@@ -57,7 +58,7 @@ function Transition(props) {
     return <Slide direction="up" {...props} />;
 }
 
-export default function OpenClass({ previewCourseData }) {
+export default function OpenClass({ previewClassData, test }) {
 
     const classes = useStyles();
     //取值
@@ -68,41 +69,75 @@ export default function OpenClass({ previewCourseData }) {
     let dispatch = useDispatch()
 
     let imageFile = React.useRef({ '班級照片檔案': null })//照片
+
     let [courseImage, setCourseImage] = React.useState({ '班級照片預覽': null })//照片預覽
     let [open, setOpen] = React.useState({ '新增課程彈窗': false });//課程清單彈窗
     let [previewCourse, setPreviewCourse] = React.useState({ '課程預覽彈窗': false })//預覽課程彈窗
     let [timeDialog, setTimeDialog] = React.useState({ '課程時間設定彈窗': false })//新曾課程時帶出時間設定的dialog
 
-    let selectCourseData = React.useRef({ '選擇的課程資料': null })//課程清單LIST 選中的課程資訊 帶出去存給下一個dialog用   
 
+    let [selectCourseData, setSelectCourseData] = React.useState({ '選擇的課程資料': null })//課程清單LIST 選中的課程資訊 帶出去存給下一個dialog用   
     let [course, setCourse] = React.useState({ '帳戶課程': [] })//該帳戶創建過的course
-
 
     let [courseStartTime, setCourseStartTime] = React.useState(new Date())//課程開始日期
     let [courseEndTime, setCourseEndTime] = React.useState(new Date())//課程開始日期
 
     let [classData, setClassData] = React.useState({
         '開班資訊': {
-            'uid': uuidv4(),
-            '班級名稱': null,
-            '上課地點': null,
-            '報名連結': null,
-            '人數限制': null,
-            '聯絡人': null,
-            '聯絡電話': null,
+            //uid給照片用
+            'imageUid': '',
+            '班級名稱': '',
+            '上課地點': '',
+            '學科': false,
+            '術科': false,
+            '報名連結': '',
+            '人數限制': '',
+            '聯絡人': '',
+            '聯絡電話': '',
             '開始日期': new Date(),
             '結束日期': new Date(),
-            '描述': null,
+            '描述': '',
             '加入班級的課程': [],
         }
     })
+    React.useEffect(() => {
+        console.log(previewClassData);
+        //阻擋第一次effect執行
+        //預覽沒點開props沒傳 是undefiend 
+        if (previewClassData) {
+            setClassData({
+                '開班資訊': {
+                    'imageUid': previewClassData.imageUid,
+                    '班級名稱': previewClassData['班級名稱'],
+                    '上課地點': previewClassData['上課地點'],
+                    '學科': previewClassData['學科'],
+                    '術科': previewClassData['術科'],
+                    '報名連結': previewClassData['報名連結'],
+                    '人數限制': previewClassData['人數限制'],
+                    '聯絡人': previewClassData['聯絡人'],
+                    '聯絡電話': previewClassData['聯絡電話'],
+                    '開始日期': previewClassData['開始日期'],
+                    '結束日期': previewClassData['結束日期'],
+                    '描述': previewClassData['描述'],
+                    '加入班級的課程': JSON.parse(previewClassData['加入班級的課程']),
+                }
+            })
+        }
 
+    }, [previewClassData])
     //照片預覽
     let courseImagePreview = (e) => {
         let reader = new FileReader()
         //照片預覽會變成另一種編碼 無法上傳 所以要分開存
         imageFile.current['班級照片檔案'] = e.target.files[0]
         if (imageFile.current['班級照片檔案']) {
+            //有照片 設定uuid
+            setClassData({
+                開班資訊: {
+                    ...classData['開班資訊'],
+                    'imageUid': uuidv4()
+                }
+            })
             reader.readAsDataURL(imageFile.current['班級照片檔案'])
             reader.onload = function (e) {
                 setCourseImage({ '班級照片預覽': e.target.result })
@@ -112,63 +147,85 @@ export default function OpenClass({ previewCourseData }) {
         }
     }
 
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault()
-        //照片上傳的部分
-        let imageName = `${userReducer.email}-${classData['開班資訊']['uid']}`
-        if (imageFile.current['班級照片檔案']) {
-            if ((imageFile.current['班級照片檔案'].type == "image/jpg" || imageFile.current['班級照片檔案'].type == 'image/jpeg' || imageFile.current['班級照片檔案'].type == 'image/png') && imageFile.current['班級照片檔案'].size <= 1000000) {
-                let formData = new FormData()
-                formData.append('test', imageFile.current['班級照片檔案'], `${imageName}`);
-                fetch('https://tms.fois.online/imgUpload', {
-                    method: 'POST',
-                    body: formData,
+        if (previewClassData) {
 
-                }).then(res => {
-                    return res.json()
-                }).then(res => {
-                    console.log(res);
-                    if (res.狀態 == '上傳成功') {
-                        dispatch({ type: 'SHOW', text: res.訊息, severity: 'success' })
-                        //window.location.reload();
-                    } else {
-                        dispatch({ type: 'SHOW', text: res.訊息, severity: 'error' })
-                    }
-                })
-            } else {
-                dispatch({ type: 'SHOW', text: '照片格式不符', severity: 'error' })
-            }
         } else {
-            console.log('沒有班級照片')
-        }
-        //資料寫入的部分
-        setClassData({ 開班資訊: { ...classData.開班資訊, '班級名稱': e.target.value } })
-        fetch(host, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8'
-            },
-            body: JSON.stringify({
-                type: '開設班級',
-            }),
-        }).then(res => {
-            return res.json()
-        }).then(res => {
-            //console.log(res);
-            if (res['狀態'] == '課程下載成功') {
-                console.log(res['訊息'])
-                setCourse({ '帳戶課程': res['訊息'] })
+            let classFetchState = false
+            //資料寫入的部分
+            await fetch(host, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                body: JSON.stringify({
+                    type: '開設班級',
+                    classData: {
+                        'userID': userReducer.id,
+                        'imageUid': classData['開班資訊']['imageUid'],
+                        '班級名稱': classData['開班資訊']['班級名稱'],
+                        '上課地點': classData['開班資訊']['上課地點'],
+                        '學科': classData['開班資訊']['學科'],
+                        '術科': classData['開班資訊']['術科'],
+                        '報名連結': classData['開班資訊']['報名連結'],
+                        '人數限制': classData['開班資訊']['人數限制'],
+                        '聯絡人': classData['開班資訊']['聯絡人'],
+                        '聯絡電話': classData['開班資訊']['聯絡電話'],
+                        '開始日期': classData['開班資訊']['開始日期'],
+                        '結束日期': classData['開班資訊']['結束日期'],
+                        '描述': classData['開班資訊']['描述'].replace(/\r\n/g, `\r\n`).replace(/\n/g, `\r\n`),
+                        '加入班級的課程': JSON.stringify(classData['開班資訊']['加入班級的課程']),
+                    }
+                }),
+            }).then(res => {
+                return res.json()
+            }).then(res => {
+                //console.log(res);
+                if (res['狀態'] == '班級開設成功') {
+                    dispatch({ type: 'SHOW', text: res['訊息'], severity: 'success' })
+                    classFetchState = true  //等待資料都上傳完 才上傳照片 當資料有問題時就不上傳照片
+                } else {
+                    dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
+                }
+
+            })
+
+            //照片上傳的部分
+            let imageName = `${userReducer.email}-${classData['開班資訊']['imageUid']}`
+            if (imageFile.current['班級照片檔案'] && classFetchState) {
+                if ((imageFile.current['班級照片檔案'].type == "image/jpg" || imageFile.current['班級照片檔案'].type == 'image/jpeg' || imageFile.current['班級照片檔案'].type == 'image/png') && imageFile.current['班級照片檔案'].size <= 1000000) {
+                    let formData = new FormData()
+                    formData.append('test', imageFile.current['班級照片檔案'], `${imageName}`);
+                    await fetch('https://tms.fois.online/imgUpload', {
+                        method: 'POST',
+                        body: formData,
+
+                    }).then(res => {
+                        return res.json()
+                    }).then(res => {
+                        console.log(res);
+                        if (res.狀態 == '上傳成功') {
+                            dispatch({ type: 'SHOW', text: `開設班級${res.訊息}`, severity: 'success' })
+                            //window.location.reload();
+                        } else {
+                            dispatch({ type: 'SHOW', text: `開設班級${res.訊息}`, severity: 'error' })
+                        }
+                    })
+                } else {
+                    dispatch({ type: 'SHOW', text: '照片格式不符', severity: 'error' })
+                }
             } else {
-                dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
+                //沒有選取消掉
+                console.log('沒有班級照片 或 課程資訊上傳不成功')
             }
-        }).then(
-            setOpen({ 新增課程彈窗: true })
-        )
+        }
+
 
     }
 
     function addCourseOnclick() {
-       
+
         fetch(host, {
             method: 'POST',
             headers: {
@@ -176,14 +233,14 @@ export default function OpenClass({ previewCourseData }) {
             },
             body: JSON.stringify({
                 type: '取得課程',
+                userID: userReducer.id
             }),
 
         }).then(res => {
             return res.json()
         }).then(res => {
-            //console.log(res);
+            console.log(res);
             if (res['狀態'] == '課程下載成功') {
-                console.log(res['訊息'])
                 setCourse({ '帳戶課程': res['訊息'] })
             } else {
                 dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
@@ -194,17 +251,20 @@ export default function OpenClass({ previewCourseData }) {
     }
     //Dialog Course List 點下 預覽課程
     let dialogCourseListOnClick = (courseDataFromListItem) => () => {
-        selectCourseData.current.選擇的課程資料 = courseDataFromListItem //帶出去存給其他dialog用
+        setSelectCourseData({ '選擇的課程資料': courseDataFromListItem })
+        //selectCourseData.current.選擇的課程資料 = courseDataFromListItem //帶出去存給其他dialog用
         setPreviewCourse({ '課程預覽彈窗': true })
     }
     //Dialog Course List 按鈕 點下'新增' 傳值過來
     let dialogCourseListaddCourseOnclick = (courseDataFromListItem) => () => {
-        selectCourseData.current.選擇的課程資料 = courseDataFromListItem //帶出去存給其他dialog用
+        setSelectCourseData({ '選擇的課程資料': courseDataFromListItem })
+        // selectCourseData.current.選擇的課程資料 = courseDataFromListItem //帶出去存給其他dialog用
         setTimeDialog({ '課程時間設定彈窗': true })
     }
 
     //時間設定完成 將課程加入班級
     let dialogCourseTimeSettingComplete = () => {
+
         let StartTime = `${courseStartTime.getFullYear()}/${courseStartTime.getMonth() + 1}/${courseStartTime.getDate()} ${courseStartTime.getHours()}:${courseStartTime.getMinutes() < 9 ? `${'0' + courseStartTime.getMinutes()}` : courseStartTime.getMinutes()}`
         let EndTime = `${courseEndTime.getFullYear()}/${courseEndTime.getMonth() + 1}/${courseEndTime.getDate()} ${courseEndTime.getHours()}:${courseEndTime.getMinutes() < 9 ? `${'0' + courseEndTime.getMinutes()}` : courseEndTime.getMinutes()}`
 
@@ -213,8 +273,10 @@ export default function OpenClass({ previewCourseData }) {
                 ...classData.開班資訊,
                 加入班級的課程: [...classData['開班資訊']['加入班級的課程'],
                 {
-                    'uid': uuidv4(),
-                    'courseName': selectCourseData.current.選擇的課程資料.courseName,
+                    //courseID 給 list的 key用
+                    //'courseID': selectCourseData.current.選擇的課程資料.id,
+                    'courseID': selectCourseData.選擇的課程資料.id,
+                    'courseName': selectCourseData.選擇的課程資料.courseName,
                     'startTime': StartTime,
                     'endTime': EndTime
                 }]
@@ -230,7 +292,7 @@ export default function OpenClass({ previewCourseData }) {
         setClassData({
             開班資訊: {
                 ...classData.開班資訊,
-                加入班級的課程: newCourseList 
+                加入班級的課程: newCourseList
             }
         })
     }
@@ -264,13 +326,26 @@ export default function OpenClass({ previewCourseData }) {
 
                                         <Grid item xs={12}>
                                             {
-                                                courseImage.班級照片預覽 ?
-                                                    <img src={courseImage.班級照片預覽} style={{ width: '100%', height: 250, objectFit: "cover" }} /> :
-                                                    <div style={{
-                                                        width: '100%', height: 250, background: '#F0F0F0',
-                                                        display: 'flex', justifyContent: "center", alignItems: "center",
-                                                    }}>
-                                                    </div>
+                                                //預覽
+                                                previewClassData ?
+                                                    previewClassData.imageUid ?
+                                                        <img
+                                                            src={`https://tms.fois.online/imgUpload/upload/${userReducer['email']}-${previewClassData['imageUid']}.jpg`}
+                                                            style={{ width: '100%', height: 250, objectFit: "cover" }} />
+                                                        : <img
+                                                            src={noImage}
+                                                            style={{ width: '100%', height: 250, objectFit: "cover" }} />
+
+                                                    :
+                                                    courseImage.班級照片預覽 ?
+                                                        <img
+                                                            src={courseImage.班級照片預覽}
+                                                            style={{ width: '100%', height: 250, objectFit: "cover" }} />
+                                                        :
+                                                        <img
+                                                            src={noImage}
+                                                            style={{ width: '100%', height: 250, objectFit: "cover" }} />
+
                                             }
                                         </Grid>
                                     </Grid>
@@ -279,11 +354,12 @@ export default function OpenClass({ previewCourseData }) {
                                 <Box p={2} pt={0} pb={1}>
                                     <Grid container spacing={1}>
                                         <Grid item xs={12}>
-                                            <Typography variant={'body2'}>班級名稱 </Typography>
+                                            <Typography variant={'body2'}>班級名稱 * </Typography>
                                             <Divider style={{ marginTop: 10 }} />
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <TextField fullWidth variant='outlined' size='small' onChange={(e) => {
+
+                                            <TextField required fullWidth variant='outlined' size='small' onChange={(e) => {
                                                 setClassData({ 開班資訊: { ...classData.開班資訊, '班級名稱': e.target.value } })
                                             }} value={classData['開班資訊']['班級名稱']} />
                                         </Grid>
@@ -306,7 +382,36 @@ export default function OpenClass({ previewCourseData }) {
                                             <Typography variant={'body2'}>班級設定</Typography>
                                             <Divider style={{ marginTop: 10 }} />
                                         </Grid>
-
+                                        <Grid item xs={6} container justify='space-between' alignItems='baseline'>
+                                            <Grid item>
+                                                學科:
+                                            </Grid>
+                                            <Grid item>
+                                                <Switch color='primary' checked={classData['開班資訊']['學科']} onChange={() => {
+                                                    setClassData(
+                                                        {
+                                                            '開班資訊':
+                                                                { ...classData['開班資訊'], '學科': !classData['開班資訊']['學科'] }
+                                                        }
+                                                    )
+                                                }}></Switch>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item xs={6} container justify='space-between' alignItems='baseline'>
+                                            <Grid item>
+                                                術科:
+                                            </Grid>
+                                            <Grid item>
+                                                <Switch color='primary' checked={classData['開班資訊']['術科']} onChange={() => {
+                                                    setClassData(
+                                                        {
+                                                            '開班資訊':
+                                                                { ...classData['開班資訊'], '術科': !classData['開班資訊']['術科'] }
+                                                        }
+                                                    )
+                                                }}></Switch>
+                                            </Grid>
+                                        </Grid>
                                         <Grid item xs={6}>
                                             <TextField label='報名連結' fullWidth variant='outlined' size='small'
                                                 onChange={(e) => {
@@ -317,7 +422,7 @@ export default function OpenClass({ previewCourseData }) {
                                         </Grid>
 
                                         <Grid item xs={6}>
-                                            <TextField label='人數限制' fullWidth variant='outlined' size='small'
+                                            <TextField required label='人數限制' fullWidth variant='outlined' size='small' type='number' inputProps={{ min: 0 }}
                                                 onChange={(e) => {
                                                     setClassData({ 開班資訊: { ...classData.開班資訊, '人數限制': e.target.value } })
                                                 }}
@@ -336,14 +441,14 @@ export default function OpenClass({ previewCourseData }) {
                                         </Grid>
 
                                         <Grid item xs={6}>
-                                            <TextField label='聯絡電話' fullWidth variant='outlined' size='small'
+                                            <TextField label='聯絡電話' fullWidth variant='outlined' size='small' type='phone'
                                                 onChange={(e) => {
                                                     setClassData({ 開班資訊: { ...classData.開班資訊, '聯絡電話': e.target.value } })
                                                 }}
                                                 value={classData['開班資訊']['聯絡電話']}
                                             />
                                         </Grid>
-                                        <Grid item xs >
+                                        <Grid item xs={6} >
                                             <MuiPickersUtilsProvider utils={DateFnsUtils} locale={twLocale}>
                                                 <DatePicker
                                                     fullWidth
@@ -358,7 +463,7 @@ export default function OpenClass({ previewCourseData }) {
                                             </MuiPickersUtilsProvider>
                                         </Grid>
 
-                                        <Grid item xs >
+                                        <Grid item xs={6} >
                                             <MuiPickersUtilsProvider utils={DateFnsUtils} locale={twLocale}>
                                                 <DatePicker
                                                     fullWidth
@@ -372,7 +477,6 @@ export default function OpenClass({ previewCourseData }) {
                                                     }} />
                                             </MuiPickersUtilsProvider>
                                         </Grid>
-
                                         <Grid item xs={12} >
                                             <Typography variant={'body2'}>描述</Typography>
                                             <Divider style={{ marginTop: 10 }} />
@@ -398,7 +502,7 @@ export default function OpenClass({ previewCourseData }) {
                                     <List>
                                         {
                                             classData['開班資訊']['加入班級的課程'].map(item =>
-                                                <ListItem key={item.uid} divider disableGutters dense>
+                                                <ListItem key={item.courseID} divider disableGutters dense>
                                                     <ListItemText primary={item['courseName']} secondary={`${item.startTime} ~ ${item.endTime}`} />
                                                     <ListItemSecondaryAction>
                                                         <Button onClick={deleteCourse(item)}>
@@ -419,8 +523,10 @@ export default function OpenClass({ previewCourseData }) {
                         {
                             //因為這一頁也有預覽的功能，利用prop資料還沒傳近來會是undefinde的特性，去當分類
                             //若為undefinde代表這一頁還沒有要當作preview頁面的功能
-                            previewCourseData ?
-                                null : <Grid item xs={12}>
+                            previewClassData ?
+                                <Grid item xs={12}>
+                                    <Button variant='contained' type='submit' color='primary' fullWidth>更新</Button>
+                                </Grid> : <Grid item xs={12}>
                                     <Button variant='contained' type='submit' color='primary' fullWidth>送出</Button>
                                 </Grid>
                         }
@@ -442,11 +548,18 @@ export default function OpenClass({ previewCourseData }) {
                 <DialogTitle id="alert-dialog-title">{"已開設的課程"}</DialogTitle>
                 <DialogContent>
                     <List>
-                        {course['帳戶課程'].map(item =>
-                            <ListItem dense divider button onClick={dialogCourseListOnClick(item)} >
+                        {course['帳戶課程'].map((item, index) =>
+
+                            < ListItem dense divider button onClick={dialogCourseListOnClick(item)} >
                                 <ListItemText primary={item['courseName']} />
                                 <ListItemSecondaryAction>
-                                    <Button onClick={dialogCourseListaddCourseOnclick(item)} color='primary'>新增</Button>
+                                    {/*  */}
+                                    <Button
+                                        disabled={classData['開班資訊']['加入班級的課程'].filter(element => element.courseID == item.id).length ? true : false}
+                                        onClick={dialogCourseListaddCourseOnclick(item)}
+                                        //onClick={() => { console.log(classData['開班資訊']['加入班級的課程'].filter(id => id == item.id).length ) }}
+                                        color='primary'>新增</Button>
+
                                 </ListItemSecondaryAction>
                             </ListItem>
 
@@ -516,7 +629,7 @@ export default function OpenClass({ previewCourseData }) {
 
             >
                 <DialogContent style={{ padding: 0 }}>
-                    <OpenCourse previewCourseData={selectCourseData.current.選擇的課程資料} />
+                    <OpenCourse previewClassData={selectCourseData.選擇的課程資料} />
                 </DialogContent>
 
                 <DialogActions>
