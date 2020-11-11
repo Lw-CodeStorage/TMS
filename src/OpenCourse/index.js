@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux'
 import { Paper, Box, Grid, TextField, Typography, Button, AppBar, Toolbar, IconButton, Avatar, Popover, Divider } from '@material-ui/core'
 import Snackbar from '@material-ui/core/Snackbar';
@@ -50,13 +51,14 @@ export default function OpenCourse({ previewCourseData }) {
     //取值
     let snackBarReducer = useSelector(state => state.snackBarReducer)
     let userReducer = useSelector(state => state.userReducer)
-
     //寫值
     let dispatch = useDispatch()
+    //react-router
+    let history = useHistory()
 
     let courseName = React.useRef(previewCourseData ? previewCourseData.courseName : null)
     let courseLink = React.useRef(previewCourseData ? previewCourseData.courseLink : null)//課程連結
-    let courseInfo = React.useRef(previewCourseData ? previewCourseData.courseInfo : null)//課程自由填寫資訊
+    let courseInfo = React.useRef(previewCourseData ? previewCourseData.courseInfo : '')//課程自由填寫資訊
 
     //let imageFile = React.useRef(null)//照片
     let [courseImage, setCourseImage] = React.useState(null)
@@ -70,7 +72,7 @@ export default function OpenCourse({ previewCourseData }) {
 
     let [Detail, setDetail] = React.useState({ type: '', data: [] })//Dialog 細節
 
-    let courseTitle = React.useRef({ type: null, selectTitle: null })//app bar tittle 或 傳值用
+    let courseTitle = React.useRef({ type: null, selectTitle: null,selectContent:'' })//app bar tittle 或 傳值用
     let [courseSelect, setCourseSelct] = React.useState([]) //最後選擇的 課程 (chips)
     let [positionSelect, setPositionSelect] = React.useState('')//最後選擇的 職位 (chips)
 
@@ -171,9 +173,9 @@ export default function OpenCourse({ previewCourseData }) {
 
     React.useEffect(() => {
         //console.log(previewCourseData) 
-        //這頁當作preview的話 不是undefinde 會進行處理
+        //這頁當作preview的話 不是undefinde 會進行附值處理
         if (previewCourseData) {
-            //console.log(previewCourseData)
+            console.log(previewCourseData)
             setVideo(previewCourseData.courseLink)
             setIndustry(previewCourseData.industry)
             setQidSelect(previewCourseData.qidSelect)
@@ -186,12 +188,15 @@ export default function OpenCourse({ previewCourseData }) {
     //     console.log(qidSelect)
     // }, [qidSelect])
     // List 課程 or 職位 選擇
-    let handleClickOpen = (type, selectTitle) => (e) => {
+    let handleClickOpen = (type, selectTitle,selectContent) => (e) => {
+        //selectTitle = UOC_ID
+        //selectContent = UOC_TITLE
         if (type == 'UOC') {
+            //console.log(selectTitle);
             setOpen(true);//開啟Dialog
             courseTitle.current.type = type
             courseTitle.current.selectTitle = selectTitle
-
+            courseTitle.current.selectContent = selectContent
             fetch(host, {
                 method: 'POST',
                 headers: {
@@ -385,9 +390,10 @@ export default function OpenCourse({ previewCourseData }) {
                 return res.json()
             }).then(res => {
                 if (res['狀態'] == '課程開設成功') {
-                    //dispatch({ type: 'SHOW', text: res['訊息'], severity: 'success' })
+                    dispatch({ type: 'SHOW', text: res['訊息'], severity: 'success' })
+                    history.push('/管理')
                 } else {
-                    //dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
+                    dispatch({ type: 'SHOW', text: res['訊息'], severity: 'error' })
                 }
             })
         }
@@ -440,7 +446,7 @@ export default function OpenCourse({ previewCourseData }) {
                                         <Divider style={{ marginTop: 10 }} />
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { courseName.current = e.target.value }} value={courseName.current} disabled={previewCourseData ? true : false} />
+                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { courseName.current = e.target.value }} value={courseName.current} disabled={previewCourseData ? true : false} required />
                                     </Grid>
                                 </Grid>
                             </Box>
@@ -469,7 +475,6 @@ export default function OpenCourse({ previewCourseData }) {
                                             <Divider style={{ marginTop: 10 }} />
                                         </Grid>
                                     </Grid>
-
                                     <Grid item xs={12}>
                                         <TextField variant="outlined" fullWidth multiline rowsMax='10' rows='10' label="P.S." onChange={(e) => { courseInfo.current = e.target.value }} value={courseInfo.current} disabled={previewCourseData ? true : false} />
 
@@ -554,22 +559,29 @@ export default function OpenCourse({ previewCourseData }) {
                                             <Divider style={{ marginTop: 10 }} />
                                         </Grid>
                                     </Grid>
+                                    {
+                                        previewCourseData ? null :
+                                            <>
+                                                <Grid item xs={12}>
 
-                                    <Grid item xs={12}>
-                                        <List dense>
-                                            {/* {console.log(pagination + 10)} */}
-                                            {UOCID.slice(pagination, pagination + 10).map((item, index) =>
+                                                    <List dense>
 
-                                                <ListItem button dense divider onClick={handleClickOpen('UOC', item['UOC_ID'])}>
-                                                    <ListItemText primary={item['UOC_ID']} secondary={item['UOC_TITLE']} />
-                                                </ListItem>
-                                            )}
-                                        </List>
+                                                        {UOCID.slice(pagination, pagination + 10).map((item, index) =>
 
-                                    </Grid>
-                                    <Grid item container xs={12} justify='center'>
-                                        <Pagination count={Math.ceil(UOCID.length / 10)} onChange={(e, value) => { setPagination((value - 1) * 10) }} size="small" fullWidth />
-                                    </Grid>
+                                                            <ListItem button dense divider onClick={handleClickOpen('UOC', item['UOC_ID'],item['UOC_TITLE'])}>
+                                                                <ListItemText primary={item['UOC_ID']} secondary={item['UOC_TITLE']} />
+                                                            </ListItem>
+                                                        )}
+                                                    </List>
+
+
+
+                                                </Grid>
+                                                <Grid item container xs={12} justify='center'>
+                                                    <Pagination count={Math.ceil(UOCID.length / 10)} onChange={(e, value) => { setPagination((value - 1) * 10) }} size="small" fullWidth />
+                                                </Grid>
+                                            </>
+                                    }
                                 </Grid>
                             </Box>
                             <Box p={2} pt={0} pb={1}>
@@ -585,22 +597,27 @@ export default function OpenCourse({ previewCourseData }) {
                                             <Divider style={{ marginTop: 10 }} />
                                         </Grid>
                                     </Grid>
+                                    {/* 偵測預覽關閉LIST */}
+                                    {previewCourseData ? null :
+                                        <>
+                                            <Grid item xs={12}>
 
-                                    <Grid item xs={12}>
-                                        <List dense>
-                                            {/* {console.log(pagination + 10)} */}
-                                            {Onet.slice(onetPagination, onetPagination + 10).map((item, index) =>
+                                                <List dense>
+                                                    {/* {console.log(pagination + 10)} */}
+                                                    {Onet.slice(onetPagination, onetPagination + 10).map((item, index) =>
 
-                                                <ListItem button dense divider onClick={handleClickOpen('Onet', item['soc_id'])}>
-                                                    <ListItemText primary={item['soc_id']} secondary={item['soc_title']} />
-                                                </ListItem>
-                                            )}
-                                        </List>
+                                                        <ListItem button dense divider onClick={handleClickOpen('Onet', item['soc_id'])}>
+                                                            <ListItemText primary={item['soc_id']} secondary={item['soc_title']} />
+                                                        </ListItem>
+                                                    )}
+                                                </List>
 
-                                    </Grid>
-                                    <Grid item container xs={12} justify='center'>
-                                        <Pagination count={Math.ceil(Onet.length / 10)} onChange={(e, value) => { setOnetPagination((value - 1) * 10) }} size="small" fullWidth />
-                                    </Grid>
+                                            </Grid>
+                                            <Grid item container xs={12} justify='center'>
+                                                <Pagination count={Math.ceil(Onet.length / 10)} onChange={(e, value) => { setOnetPagination((value - 1) * 10) }} size="small" fullWidth />
+                                            </Grid>
+                                        </>
+                                    }
                                 </Grid>
                             </Box>
 
@@ -627,7 +644,7 @@ export default function OpenCourse({ previewCourseData }) {
                             <CloseIcon />
                         </IconButton>
                         <Typography variant="h6" className={classes.title}>
-                            {courseTitle.current.selectTitle}
+                        <ListItem divider>courseTitle.current.selectTitle</ListItem>
                         </Typography>
                         <Button autoFocus color="inherit" onClick={handleChoose}>
                             選擇
@@ -638,6 +655,15 @@ export default function OpenCourse({ previewCourseData }) {
                     <Paper>
                         <Box p={2} pb={1}>
                             <Grid container spacing={1}>
+                                <Grid item xs={12}>
+                                    <Typography>描述</Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Divider />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    {courseTitle.current.selectContent}
+                                </Grid>
                                 <Grid item xs={12}>
                                     <Typography>內容</Typography>
                                 </Grid>

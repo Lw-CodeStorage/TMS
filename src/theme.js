@@ -11,15 +11,20 @@ const theme = createMuiTheme({
             main: '#009688',
             light:'#4db6ac'
         },
-        // secondary: {
-        //     main: '#f44336',
-        //     contrastText: '#ffffff'
-        // },
+        secondary: {
+            main: '#77a88D',
+            contrastText: '#ffffff'
+        },
+        facebook:{
+            background: '#3b5998'
+        },
+        error:{
+            main:'#f44336'
+        }
+
     },
     typography: {
         fontFamily: `Noto Sans TC, sans- serif !important`
     },
-
-
 });
 export default theme;
