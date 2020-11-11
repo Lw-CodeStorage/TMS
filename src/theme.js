@@ -12,7 +12,7 @@ const theme = createMuiTheme({
             light:'#4db6ac'
         },
         secondary: {
-            main: '#f44336',
+            main: '#77a88D',
             contrastText: '#ffffff'
         },
         facebook:{

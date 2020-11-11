@@ -26,6 +26,8 @@ let userReducer = (state = {}, action) => {
     switch (action.type) {
         case 'USER_DATA':
             return action.data
+        case 'USER_DATA_CLEAR':
+            return {}
         default:
             return state
     }
@@ -35,7 +37,7 @@ let allReducer = combineReducers({
     snackBarReducer: snackBarReducer,
     loginReducer: loginReducer,
     userReducer: userReducer,
-   
+
 })
 
 export default allReducer

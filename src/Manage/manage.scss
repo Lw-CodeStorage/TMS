@@ -1,0 +1,9 @@
+@media screen and (max-width:415px){
+    .MuiListItemText-root{
+        flex:0 0 150px !important;
+       }
+       .MuiListItemText-secondary{ 
+           overflow: hidden;
+           text-overflow: ellipsis;
+       }
+}

@@ -72,7 +72,7 @@ export default function OpenCourse({ previewCourseData }) {
 
     let [Detail, setDetail] = React.useState({ type: '', data: [] })//Dialog 細節
 
-    let courseTitle = React.useRef({ type: null, selectTitle: null })//app bar tittle 或 傳值用
+    let courseTitle = React.useRef({ type: null, selectTitle: null,selectContent:'' })//app bar tittle 或 傳值用
     let [courseSelect, setCourseSelct] = React.useState([]) //最後選擇的 課程 (chips)
     let [positionSelect, setPositionSelect] = React.useState('')//最後選擇的 職位 (chips)
 
@@ -173,9 +173,9 @@ export default function OpenCourse({ previewCourseData }) {
 
     React.useEffect(() => {
         //console.log(previewCourseData) 
-        //這頁當作preview的話 不是undefinde 會進行處理
+        //這頁當作preview的話 不是undefinde 會進行附值處理
         if (previewCourseData) {
-            //console.log(previewCourseData)
+            console.log(previewCourseData)
             setVideo(previewCourseData.courseLink)
             setIndustry(previewCourseData.industry)
             setQidSelect(previewCourseData.qidSelect)
@@ -188,12 +188,15 @@ export default function OpenCourse({ previewCourseData }) {
     //     console.log(qidSelect)
     // }, [qidSelect])
     // List 課程 or 職位 選擇
-    let handleClickOpen = (type, selectTitle) => (e) => {
+    let handleClickOpen = (type, selectTitle,selectContent) => (e) => {
+        //selectTitle = UOC_ID
+        //selectContent = UOC_TITLE
         if (type == 'UOC') {
+            //console.log(selectTitle);
             setOpen(true);//開啟Dialog
             courseTitle.current.type = type
             courseTitle.current.selectTitle = selectTitle
-
+            courseTitle.current.selectContent = selectContent
             fetch(host, {
                 method: 'POST',
                 headers: {
@@ -443,7 +446,7 @@ export default function OpenCourse({ previewCourseData }) {
                                         <Divider style={{ marginTop: 10 }} />
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { courseName.current = e.target.value }} value={courseName.current} disabled={previewCourseData ? true : false} required/>
+                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { courseName.current = e.target.value }} value={courseName.current} disabled={previewCourseData ? true : false} required />
                                     </Grid>
                                 </Grid>
                             </Box>
@@ -565,7 +568,7 @@ export default function OpenCourse({ previewCourseData }) {
 
                                                         {UOCID.slice(pagination, pagination + 10).map((item, index) =>
 
-                                                            <ListItem button dense divider onClick={handleClickOpen('UOC', item['UOC_ID'])}>
+                                                            <ListItem button dense divider onClick={handleClickOpen('UOC', item['UOC_ID'],item['UOC_TITLE'])}>
                                                                 <ListItemText primary={item['UOC_ID']} secondary={item['UOC_TITLE']} />
                                                             </ListItem>
                                                         )}
@@ -641,7 +644,7 @@ export default function OpenCourse({ previewCourseData }) {
                             <CloseIcon />
                         </IconButton>
                         <Typography variant="h6" className={classes.title}>
-                            {courseTitle.current.selectTitle}
+                        <ListItem divider>courseTitle.current.selectTitle</ListItem>
                         </Typography>
                         <Button autoFocus color="inherit" onClick={handleChoose}>
                             選擇
@@ -652,6 +655,15 @@ export default function OpenCourse({ previewCourseData }) {
                     <Paper>
                         <Box p={2} pb={1}>
                             <Grid container spacing={1}>
+                                <Grid item xs={12}>
+                                    <Typography>描述</Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Divider />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    {courseTitle.current.selectContent}
+                                </Grid>
                                 <Grid item xs={12}>
                                     <Typography>內容</Typography>
                                 </Grid>
