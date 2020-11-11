@@ -41,14 +41,7 @@ function App() {
       <CssBaseline>
         <Router>
           <MenuBar />
-          {/* 這是給GitPage用 */}
-          {/* <Switch>
-            <Route path="/TMS_FrontEnd/開設課程"> {userReducer['Authority'] == '老師' ? <OpenCourse /> : <Main />}</Route>
-            <Route path="/TMS_FrontEnd/開設班級">{userReducer['Authority'] == '老師' ? <OpenClass /> : <Main />} </Route>
-            <Route path="/TMS_FrontEnd/管理">{userReducer['Authority'] == '老師' ? <Manage />  : <Main />}</Route>
-            <Route path="/TMS_FrontEnd/我的班級">{userReducer['Authority'] == '學生' ? <UserClass />  : <Main />}</Route>
-            <Route path="/*"> <Main /> </Route>
-          </Switch> */}
+
           <Switch>
             <Route path="/開設課程"> {userReducer['Authority'] == '老師' ? <OpenCourse /> : <Main />}</Route>
             <Route path="/開設班級">{userReducer['Authority'] == '老師' ? <OpenClass /> : <Main />} </Route>
