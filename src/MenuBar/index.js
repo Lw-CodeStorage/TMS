@@ -161,29 +161,53 @@ export default function MenuBar() {
     let fbResponse = (response) => {
         console.log(response)
         if (response.email) {
-            fetch(host, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json; charset=utf-8'
-                },
-                body: JSON.stringify({
-                    type: 'FB',
-                    email: response.email,
-                    name: response.name,
-                    picture: response.picture.data.url
-                }),
-            }).then(res => {
+            //去cbet看有沒有註冊和付費
+            fetch("https://cbet.org.tw/wp-content/plugins/fblogin/Cbet_Class/Main.php",{
+                method:'POST',
+                headers:{
+                    'Content-Type': 'application/json; charset=utf-8',
+                },body:JSON.stringify({
+                    key:"userDetectAndRegistered",
+                    userData:{
+                        email:response.email,
+                        id:response.id,
+                        name:response.name
+                    },
+                    device:"Facebook"
+               })
+             }).then(res=>{
                 return res.json()
-            }).then(res => {
-                if (res.狀態 == '查詢成功') {
-                    // console.log(res.訊息)
-                    document.cookie = `TMS=${response.email};max-age = 3600 path=/`
-                    dispatch({ type: 'USER_DATA', data: res['訊息'] })
-                    dispatch({ type: 'IS_LOGIN' })
-
+            }).then(res=>{
+                //console.log(res)
+                //cbet那邊有繳費
+                if(res.狀態 == "已繳費"){
+                    fetch(host, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8'
+                        },
+                        body: JSON.stringify({
+                            type: 'FB',
+                            email: response.email,
+                            name: response.name,
+                            picture: response.picture.data.url
+                        }),
+                    }).then(res => {
+                        return res.json()
+                    }).then(res => {
+                        if (res.狀態 == '查詢成功') {
+                            // console.log(res.訊息)
+                            document.cookie = `TMS=${response.email};max-age = 3600 path=/`
+                            dispatch({ type: 'USER_DATA', data: res['訊息'] })
+                            dispatch({ type: 'IS_LOGIN' })
+                        }
+                    })   
+                }
+                //沒繳費不准登入
+                else{
+                    alert("沒繳費")
                 }
             })
-
         } else {
             console.log('FB沒登');
         }
@@ -196,21 +220,7 @@ export default function MenuBar() {
         history.push('/')
         window.location.reload()
     }
-    // let test = () => {
-    //     window.FB.getLoginStatus(function (response) {
-    //         if (response.status === 'connected') {
-    //             let me = window.FB.api('/me', function (response) {
-    //                 console.log(JSON.stringify(response));
-    //             });
-    //             console.log(me)
-    //             console.log(1)
-    //         } else if (response.status === 'not_authorized') {
-    //             console.log(2)
-    //         } else {
-    //             console.log(3)
-    //         }
-    //     });
-    // }
+   
     return (
         < AppBar position="static">
             <Toolbar variant="dense" style={{cursor: 'pointer'}}>
