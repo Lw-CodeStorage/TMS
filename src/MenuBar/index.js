@@ -179,7 +179,8 @@ export default function MenuBar() {
                 return res.json()
             }).then(res=>{
                 //console.log(res)
-                //cbet那邊有繳費
+                //cbet那邊有繳費，繼續登入流程
+                //檢查在這邊有沒有帳號，沒有自動創一個，主體還是要在ＣＢＥＴ那邊有
                 if(res.狀態 == "已繳費"){
                     fetch(host, {
                         method: 'POST',
