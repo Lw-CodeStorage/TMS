@@ -56,9 +56,13 @@ export default function OpenCourse({ previewCourseData }) {
     //react-router
     let history = useHistory()
 
-    let courseName = React.useRef(previewCourseData ? previewCourseData.courseName : null)
-    let courseLink = React.useRef(previewCourseData ? previewCourseData.courseLink : null)//課程連結
-    let courseInfo = React.useRef(previewCourseData ? previewCourseData.courseInfo : '')//課程自由填寫資訊
+    // let courseName = React.useRef(previewCourseData ? previewCourseData.courseName : null)
+    // let courseLink = React.useRef(previewCourseData ? previewCourseData.courseLink : null)//課程連結
+    // let courseInfo = React.useRef(previewCourseData ? previewCourseData.courseInfo : '')//課程自由填寫資訊
+
+    let [courseName,setCourseName] = React.useState(previewCourseData ? previewCourseData.courseName : null)
+    let [courseLink,setCourseLink] = React.useState(previewCourseData ? previewCourseData.courseLink : null)//課程連結
+    let [courseInfo,setCourseInfo] = React.useState(previewCourseData ? previewCourseData.courseInfo : '')//課程自由填寫資訊
 
     //let imageFile = React.useRef(null)//照片
     let [courseImage, setCourseImage] = React.useState(null)
@@ -291,7 +295,7 @@ export default function OpenCourse({ previewCourseData }) {
 
     let handleSubmit = (e) => {
         e.preventDefault()
-        let imageName = `${userReducer.email}-${courseName.current}`
+        let imageName = `${userReducer.email}-${courseName}`
         //上傳照片
         // if (imageFile.current) {
         //     if ((imageFile.current.type == "image/jpg" || imageFile.current.type == 'image/jpeg' || imageFile.current.type == 'image/png') && imageFile.current.size <= 1000000) {
@@ -330,9 +334,9 @@ export default function OpenCourse({ previewCourseData }) {
                         //課程ID
                         'courseID': previewCourseData.id,
                         //CourseName
-                        'courseName': courseName.current,
+                        'courseName': courseName,
                         //課程資訊
-                        'courseInfo': courseInfo.current.replace(/\r\n/g, `\r\n`).replace(/\n/g, `\r\n`),
+                        'courseInfo': courseInfo.replace(/\r\n/g, `\r\n`).replace(/\n/g, `\r\n`),
                         //課程連結
                         'courseLink': video,
                         //產業別選擇
@@ -369,9 +373,9 @@ export default function OpenCourse({ previewCourseData }) {
                         //創建課程帳號ID
                         'userID': userReducer.id,
                         //CourseName
-                        'courseName': courseName.current,
+                        'courseName': courseName,
                         //課程資訊
-                        'courseInfo': courseInfo.current.replace(/\r\n/g, `\r\n`).replace(/\n/g, `\r\n`),
+                        'courseInfo': courseInfo.replace(/\r\n/g, `\r\n`).replace(/\n/g, `\r\n`),
                         //課程連結
                         'courseLink': video,
                         //產業別選擇
@@ -446,7 +450,7 @@ export default function OpenCourse({ previewCourseData }) {
                                         <Divider style={{ marginTop: 10 }} />
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { courseName.current = e.target.value }} value={courseName.current} disabled={previewCourseData ? true : false} required />
+                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { setCourseName(e.target.value) }} value={courseName} disabled={previewCourseData ? true : false} required />
                                     </Grid>
                                 </Grid>
                             </Box>
@@ -457,7 +461,7 @@ export default function OpenCourse({ previewCourseData }) {
                                         <Divider style={{ marginTop: 10 }} />
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { setVideo(e.target.value) }} component='a' value={courseLink.current} disabled={previewCourseData ? true : false} />
+                                        <TextField fullWidth variant='outlined' size='small' onChange={(e) => { setVideo(e.target.value) }} component='a' value={courseLink} disabled={previewCourseData ? true : false} />
                                     </Grid>
                                     <Grid item xs={12} style={{ maxWidth: 400, }}>
                                         <iframe style={{ width: '100%', height: 225 }} id="player" src={`https://www.youtube.com/embed/${video}`} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen='true'></iframe>
@@ -476,8 +480,17 @@ export default function OpenCourse({ previewCourseData }) {
                                         </Grid>
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <TextField variant="outlined" fullWidth multiline rowsMax='10' rows='10' label="P.S." onChange={(e) => { courseInfo.current = e.target.value }} value={courseInfo.current} disabled={previewCourseData ? true : false} />
-
+                                        <TextField 
+                                        variant="outlined" 
+                                        fullWidth 
+                                        multiline 
+                                        rowsMax='10' 
+                                        rows='10' 
+                                        label="P.S." 
+                                        //onChange={(e) => { console.log(e.target.value); }}
+                                        onChange={(e) => { setCourseInfo(e.target.value) }}
+                                        value={courseInfo} 
+                                        disabled={previewCourseData ? true : false} />
                                     </Grid>
 
                                 </Grid>
