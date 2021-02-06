@@ -27,6 +27,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useTheme } from '@material-ui/core/styles';
 import { orange, red } from '@material-ui/core/colors';
 import './manage.css'
+import theme from '../theme';
 const useStyles = makeStyles(theme => ({
     //這邊傳入theme可以直接取到 createMuiTheme ThemeProvider 傳下來的值
     root: {
@@ -345,13 +346,29 @@ let ClassManageList = React.memo(function ClassManageList({ classData, setClassD
         })
 
     }
+    //結束班級 
+    let closeClass = () =>{
+        //console.log(classData);
+         fetch(host, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8'
+            },
+            body: JSON.stringify({
+                type: '結束班級',
+                classID:classData.id
+            })
+        }).then(()=>{
+            window.location.reload();
+        })
 
+    }
     return (
         <>
 
             <ListItem divider button onClick={() => { setOpen(true) }}>
                 <ListItemText
-                    primary={classData['班級名稱']}
+                    primary={`${classData['班級名稱']} - ${classData['班級狀態']}`}
                     secondary={`人數 : ${classApplyNumber}/${classData['人數限制']}人`}
                 />
                 <ListItemSecondaryAction>
@@ -527,27 +544,27 @@ let ClassManageList = React.memo(function ClassManageList({ classData, setClassD
                                             <ListItemText
                                                 primary={'實習'}
                                             />
-                                              {//判斷有沒有評過分  
+                                            {//判斷有沒有評過分  
                                                 score.length ?
-                                                score[index]['實習'] == '未評分' ?
+                                                    score[index]['實習'] == '未評分' ?
 
-                                                    <ListItemSecondaryAction>
-                                                        <Button size='small'
-                                                            color='primary'
-                                                            onClick={
-                                                                updataScore('實習', '通過', item['applyID'])
-                                                            }>通過</Button>
-                                                        <Button size='small'
-                                                            className={classes.btn}
-                                                            onClick={
-                                                                updataScore('實習', '未通過', item['applyID'])}
-                                                        >未通過</Button>
-                                                    </ListItemSecondaryAction> :
-                                                    <ListItemSecondaryAction>
-                                                        {score[index]['實習']}
-                                                    </ListItemSecondaryAction>
+                                                        <ListItemSecondaryAction>
+                                                            <Button size='small'
+                                                                color='primary'
+                                                                onClick={
+                                                                    updataScore('實習', '通過', item['applyID'])
+                                                                }>通過</Button>
+                                                            <Button size='small'
+                                                                className={classes.btn}
+                                                                onClick={
+                                                                    updataScore('實習', '未通過', item['applyID'])}
+                                                            >未通過</Button>
+                                                        </ListItemSecondaryAction> :
+                                                        <ListItemSecondaryAction>
+                                                            {score[index]['實習']}
+                                                        </ListItemSecondaryAction>
 
-                                                : null}
+                                                    : null}
                                         </ListItem> : null
                                     }
                                     <Divider></Divider>
@@ -557,9 +574,16 @@ let ClassManageList = React.memo(function ClassManageList({ classData, setClassD
                     </List>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => { setClassManage({ ...classManage, '彈窗': false }) }} color="primary" autoFocus>
+                {/* <Button onClick={closeClass}>
+                        結束班級
+                    </Button> */}
+                    <Button onClick={closeClass}>
+                        結束班級
+                    </Button>
+                    <Button onClick={() => { setClassManage({ ...classManage, '彈窗': false }) }} color="primary" >
                         關閉
                     </Button>
+
                 </DialogActions>
             </Dialog>
         </>
@@ -578,7 +602,7 @@ export default function Manage() {
     let [classData, setClassData] = React.useState([])
 
     React.useEffect(() => {
-      
+
         fetch(host, {
             method: 'POST',
             headers: {
